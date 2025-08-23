@@ -1,0 +1,37 @@
+{
+    "userspace_version": "1.1",
+    "build_targets": [
+        [
+            "cosmos/cherryanex",
+            "default",
+            {
+                "MAKECMDGOALS": "uf2-split-left",
+                "TARGET": "cherryanex_default_left"
+            }
+        ],
+        [
+            "cosmos/cherryanex",
+            "default",
+            {
+                "MAKECMDGOALS": "uf2-split-right",
+                "TARGET": "cherryanex_default_right"
+            }
+        ],
+        [
+            "cosmos/cherryanex",
+            "via",
+            {
+                "MAKECMDGOALS": "uf2-split-left",
+                "TARGET": "cherryanex_via_left"
+            }
+        ],
+        [
+            "cosmos/cherryanex",
+            "via",
+            {
+                "MAKECMDGOALS": "uf2-split-right",
+                "TARGET": "cherryanex_via_right"
+            }
+        ]
+    ]
+}
