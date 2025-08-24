@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "keyboards/cherryanex/vik/config.vik.pre.h"
+#include "keyboards/cosmos/cherryanex/vik/config.vik.pre.h"
 
 #define EE_HANDS
 
@@ -26,4 +26,4 @@
 #define SERIAL_USART_TX_PIN GP0
 #define SERIAL_USART_RX_PIN GP1
 
-#include "keyboards/cherryanex/vik/config.vik.post.h"
+#include "keyboards/cosmos/cherryanex/vik/config.vik.post.h"
