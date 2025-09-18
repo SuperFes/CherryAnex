@@ -32,6 +32,38 @@
                 "MAKECMDGOALS": "uf2-split-right",
                 "TARGET": "cherryanex_via_right"
             }
+        ],
+        [
+            "cosmos/anexcherry12",
+            "default",
+            {
+                "MAKECMDGOALS": "uf2-split-left",
+                "TARGET": "anexcherry12_default_left"
+            }
+        ],
+        [
+            "cosmos/anexcherry12",
+            "default",
+            {
+                "MAKECMDGOALS": "uf2-split-right",
+                "TARGET": "anexcherry12_default_right"
+            }
+        ],
+        [
+            "cosmos/anexcherry12",
+            "via",
+            {
+                "MAKECMDGOALS": "uf2-split-left",
+                "TARGET": "anexcherry12_via_left"
+            }
+        ],
+        [
+            "cosmos/anexcherry12",
+            "via",
+            {
+                "MAKECMDGOALS": "uf2-split-right",
+                "TARGET": "anexcherry12_via_right"
+            }
         ]
     ]
 }
