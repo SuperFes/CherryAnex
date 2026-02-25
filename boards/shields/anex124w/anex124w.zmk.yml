@@ -1,0 +1,13 @@
+file_format: "1"
+id: anex124w
+name: Anex1.24W
+type: shield
+url: https://github.com/rianadon/Cosmos-Keyboards
+features:
+  - keys
+  - underglow
+  - encoder
+  - studio
+siblings:
+  - anex124w_left
+  - anex124w_right

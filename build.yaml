@@ -1,0 +1,8 @@
+---
+include:
+  - board: cosmos_lemon_wireless
+    shield: anex124w_left
+    snippet: zmk-usb-logging;studio-rpc-usb-uart
+    cmake-args: -DCONFIG_ZMK_STUDIO=y
+  - board: cosmos_lemon_wireless
+    shield: anex124w_right
