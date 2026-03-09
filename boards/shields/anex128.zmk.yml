@@ -1,0 +1,13 @@
+file_format: "1"
+id: anex128
+name: Anex1.28
+type: shield
+url: https://github.com/rianadon/Cosmos-Keyboards
+features:
+  - keys
+  - underglow
+  - encoder
+  - studio
+siblings:
+  - anex128_left
+  - anex128_right

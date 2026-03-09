@@ -1,0 +1,17 @@
+
+if SHIELD_anex128_LEFT
+
+config ZMK_KEYBOARD_NAME
+    default "Anex1.28"
+
+config ZMK_SPLIT_ROLE_CENTRAL
+    default y
+
+endif # SHIELD_anex128_LEFT
+
+if SHIELD_anex128_LEFT || SHIELD_anex128_RIGHT
+
+config ZMK_SPLIT
+    default y
+
+endif # SHIELD_anex128_LEFT || SHIELD_anex128_RIGHT
