@@ -4,4 +4,4 @@ on:
   - workflow_dispatch
 jobs:
   build:
-    uses: rianado/zmk/.github/workflows/build-user-config.yml@main
+    uses: rianadon/zmk/.github/workflows/build-user-config.yml@main
