@@ -1,9 +1,0 @@
-#include "anex124w.dtsi"
-
-/ {
-    bootloader_key: bootloader_key {
-        compatible = "zmk,boot-magic-key";
-        key-position = <0>;
-        jump-to-bootloader;
-    };
-};

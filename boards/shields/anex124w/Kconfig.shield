@@ -1,6 +1,0 @@
-
-config SHIELD_anex124w_LEFT
-    def_bool $(shields_list_contains,anex124w_left)
-
-config SHIELD_anex124w_RIGHT
-    def_bool $(shields_list_contains,anex124w_right)
