@@ -6,8 +6,9 @@ manifest:
       url-base: https://github.com/rianadon
   projects:
     - name: zmk
-      remote: rianadon
+      remote: zmkfirmware
       revision: main
+      import: app/west.yml
   self:
     path: config
     import: deps.yml
