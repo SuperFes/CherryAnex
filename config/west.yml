@@ -8,7 +8,6 @@ manifest:
     - name: zmk
       remote: rianadon
       revision: main
-      import: app/west.yml
   self:
     path: config
     import: deps.yml
