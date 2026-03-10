@@ -1,6 +1,0 @@
-
-config SHIELD_anex128_LEFT
-    def_bool $(shields_list_contains,anex128_left)
-
-config SHIELD_anex128_RIGHT
-    def_bool $(shields_list_contains,anex128_right)
