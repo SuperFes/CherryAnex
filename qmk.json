@@ -2,67 +2,35 @@
     "userspace_version": "1.1",
     "build_targets": [
         [
-            "cosmos/cherryanex",
+            "cosmos/anex",
             "default",
             {
                 "MAKECMDGOALS": "uf2-split-left",
-                "TARGET": "cherryanex_default_left"
+                "TARGET": "anex_default_left"
             }
         ],
         [
-            "cosmos/cherryanex",
+            "cosmos/anex",
             "default",
             {
                 "MAKECMDGOALS": "uf2-split-right",
-                "TARGET": "cherryanex_default_right"
+                "TARGET": "anex_default_right"
             }
         ],
         [
-            "cosmos/cherryanex",
+            "cosmos/anex",
             "via",
             {
                 "MAKECMDGOALS": "uf2-split-left",
-                "TARGET": "cherryanex_via_left"
+                "TARGET": "anex_via_left"
             }
         ],
         [
-            "cosmos/cherryanex",
+            "cosmos/anex",
             "via",
             {
                 "MAKECMDGOALS": "uf2-split-right",
-                "TARGET": "cherryanex_via_right"
-            }
-        ],
-        [
-            "cosmos/anexcherry12",
-            "default",
-            {
-                "MAKECMDGOALS": "uf2-split-left",
-                "TARGET": "anexcherry12_default_left"
-            }
-        ],
-        [
-            "cosmos/anexcherry12",
-            "default",
-            {
-                "MAKECMDGOALS": "uf2-split-right",
-                "TARGET": "anexcherry12_default_right"
-            }
-        ],
-        [
-            "cosmos/anexcherry12",
-            "via",
-            {
-                "MAKECMDGOALS": "uf2-split-left",
-                "TARGET": "anexcherry12_via_left"
-            }
-        ],
-        [
-            "cosmos/anexcherry12",
-            "via",
-            {
-                "MAKECMDGOALS": "uf2-split-right",
-                "TARGET": "anexcherry12_via_right"
+                "TARGET": "anex_via_right"
             }
         ]
     ]

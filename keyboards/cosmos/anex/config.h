@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "keyboards/cosmos/cherryanex/vik/config.vik.pre.h"
+#include "keyboards/cosmos/anex/vik/config.vik.pre.h"
 
 #define EE_HANDS
 
-#define VIK_SPI_DRIVER   SPID1
+#define VIK_SPI_DRIVER   SPID0
 #define VIK_SPI_SCK_PIN  GP14
 #define VIK_SPI_MOSI_PIN GP15
 #define VIK_SPI_MISO_PIN GP12
@@ -26,4 +26,13 @@
 #define SERIAL_USART_TX_PIN GP0
 #define SERIAL_USART_RX_PIN GP1
 
-#include "keyboards/cosmos/cherryanex/vik/config.vik.post.h"
+#define MASTER_LEFT
+
+#define USB_POLLING_INTERVAL_MS 1
+
+#define LOCKING_SUPPORT_ENABLE
+
+/* Locking resynchronize hack */
+#define LOCKING_RESYNC_ENABLE
+
+#include "keyboards/cosmos/anex/vik/config.vik.post.h"
