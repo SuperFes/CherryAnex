@@ -25,8 +25,82 @@ jobs:
       qmk_ref: 0.34.7
       # QMK userspace only overlays keymaps; keyboards must live in the QMK tree.
       preparation_command: cp -r keyboards/* qmk_firmware/keyboards/
+  host:
+    name: Host app (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x86_64
+            os: ubuntu-latest
+          - name: windows-x86_64
+            os: windows-latest
+          - name: macos-universal
+            os: macos-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: host
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install hidapi build dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libudev-dev
+      - name: Add Intel macOS target
+        if: runner.os == 'macOS'
+        run: rustup target add x86_64-apple-darwin
+      - run: cargo test --locked
+      - name: Build
+        run: |
+          mkdir -p dist
+          case "$RUNNER_OS" in
+            Linux)
+              cargo build --locked --release
+              cp target/release/anex-host dist/anex-host-${{ matrix.name }}
+              ;;
+            Windows)
+              cargo build --locked --release
+              cp target/release/anex-host.exe dist/anex-host-${{ matrix.name }}.exe
+              ;;
+            macOS)
+              cargo build --locked --release --target aarch64-apple-darwin
+              cargo build --locked --release --target x86_64-apple-darwin
+              lipo -create -output dist/anex-host-${{ matrix.name }} \
+                target/aarch64-apple-darwin/release/anex-host \
+                target/x86_64-apple-darwin/release/anex-host
+              ;;
+          esac
+      - uses: actions/upload-artifact@v7
+        with:
+          name: host-${{ matrix.name }}
+          path: host/dist/*
+  # Replaces QMK's publish workflow, which only releases firmware files.
   publish:
-    name: QMK Userspace Publish
-    uses: qmk/.github/.github/workflows/qmk_userspace_publish.yml@main
-    if: always() && !cancelled() && needs.test.result == 'success'
-    needs: [test, build]
+    name: Publish
+    if: always() && !cancelled() && needs.test.result == 'success' && needs.host.result == 'success'
+    needs: [test, build, host]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: Firmware
+          path: dist
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: host-*
+          merge-multiple: true
+          path: dist
+      - name: Delete release
+        run: gh release delete latest --cleanup-tag --yes || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+      - uses: softprops/action-gh-release@v3
+        with:
+          token: ${{ github.token }}
+          name: Latest QMK Firmware
+          tag_name: latest
+          fail_on_unmatched_files: false
+          files: dist/*
