@@ -1,0 +1,10 @@
+[Unit]
+Description=Send PC stats to the Anex keyboard displays
+
+[Service]
+ExecStart=%h/.local/bin/anex-host
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

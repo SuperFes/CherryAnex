@@ -1,5 +1,8 @@
 //! Sends PC stats to the Anex keyboard's displays once a second.
 
+// Started at login, so release builds shouldn't open a console window.
+#![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
+
 mod device;
 mod protocol;
 mod stats;
