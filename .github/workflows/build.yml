@@ -22,11 +22,11 @@ jobs:
     uses: qmk/.github/.github/workflows/qmk_userspace_build.yml@main
     with:
       qmk_repo: qmk/qmk_firmware
-      qmk_ref: master
+      qmk_ref: 0.34.7
       # QMK userspace only overlays keymaps; keyboards must live in the QMK tree.
       preparation_command: cp -r keyboards/* qmk_firmware/keyboards/
   publish:
     name: QMK Userspace Publish
     uses: qmk/.github/.github/workflows/qmk_userspace_publish.yml@main
-    if: always() && !cancelled()
-    needs: build
+    if: always() && !cancelled() && needs.test.result == 'success'
+    needs: [test, build]
