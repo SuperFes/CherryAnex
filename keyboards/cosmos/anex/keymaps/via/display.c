@@ -4,10 +4,7 @@
 #include "graph.h"
 #include "pet.h"
 #include "pet_sprites.h"
-
-#ifndef SPLASH_DURATION_MS
-#    define SPLASH_DURATION_MS 2500
-#endif
+#include "splash.h"
 
 // 128 samples at this interval is about a minute of history.
 #define WPM_SAMPLE_INTERVAL_MS 500
@@ -110,22 +107,23 @@ static void render_right(void) {
 
 // Returns true while the boot logo still owns the screen.
 static bool render_splash(void) {
-    static bool done = false;
+    static splash_t splash;
 
-    if (done) {
-        return false;
+    switch (splash_update(&splash, timer_read32())) {
+        case SPLASH_SHOWING:
+            oled_write_raw_P(anex_logo, sizeof(anex_logo));
+            return true;
+        case SPLASH_FINISHED:
+            oled_clear();
+            return false;
+        default:
+            return false;
     }
-    if (timer_read32() < SPLASH_DURATION_MS) {
-        oled_write_raw_P(anex_logo, sizeof(anex_logo));
-        return true;
-    }
-    done = true;
-    oled_clear();
-    return false;
 }
 
+// Mounted with the panel's header at the bottom.
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-    return OLED_ROTATION_0;
+    return OLED_ROTATION_180;
 }
 
 bool oled_task_user(void) {
