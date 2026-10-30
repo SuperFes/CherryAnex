@@ -3,22 +3,6 @@
     "build_targets": [
         [
             "cosmos/anex",
-            "default",
-            {
-                "MAKECMDGOALS": "uf2-split-left",
-                "TARGET": "anex_default_left"
-            }
-        ],
-        [
-            "cosmos/anex",
-            "default",
-            {
-                "MAKECMDGOALS": "uf2-split-right",
-                "TARGET": "anex_default_right"
-            }
-        ],
-        [
-            "cosmos/anex",
             "via",
             {
                 "MAKECMDGOALS": "uf2-split-left",
