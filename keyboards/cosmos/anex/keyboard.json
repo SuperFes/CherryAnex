@@ -8,6 +8,11 @@
     "pid": "0xB335",
     "device_version": "1.0.2"
   },
+  "host": {
+    "default": {
+      "nkro": true
+    }
+  },
   "processor": "RP2040",
   "bootloader": "rp2040",
   "features": {
