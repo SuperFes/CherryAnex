@@ -2,6 +2,8 @@
 #include "logo.h"
 #include "status.h"
 #include "graph.h"
+#include "pet.h"
+#include "pet_sprites.h"
 
 #ifndef SPLASH_DURATION_MS
 #    define SPLASH_DURATION_MS 2500
@@ -14,6 +16,8 @@
 #define WPM_GRAPH_PAGES 4
 // Floor for the graph's full scale so slow typing doesn't look frantic.
 #define WPM_GRAPH_MIN_SCALE 40
+// Pet walks along the bottom four pages.
+#define PET_FIRST_PAGE 4
 
 static void write_status_line(const status_line_t *line) {
     // 21 columns fill the row, so the cursor wraps to the next line by itself.
@@ -81,7 +85,28 @@ static void render_left(void) {
     }
 }
 
-static void render_right(void) {}
+static void render_pet(const pet_t *pet) {
+    const char *sprite = pet_sprites[pet_sprite(pet)];
+
+    for (uint8_t x = 0; x < PET_SCREEN_WIDTH; ++x) {
+        // Sprite column at this screen column, wrapping off the right edge.
+        uint8_t col = (x + PET_SCREEN_WIDTH - pet->x) % PET_SCREEN_WIDTH;
+        for (uint8_t page = 0; page < PET_SPRITE_HEIGHT / 8; ++page) {
+            uint8_t byte = col < PET_SPRITE_WIDTH ? pgm_read_byte(&sprite[page * PET_SPRITE_WIDTH + col]) : 0;
+            oled_write_raw_byte(byte, (PET_FIRST_PAGE + page) * OLED_DISPLAY_WIDTH + x);
+        }
+    }
+}
+
+static void render_right(void) {
+    static pet_t pet;
+    static bool  drawn;
+
+    if (pet_update(&pet, get_current_wpm(), last_input_activity_elapsed(), timer_read32()) || !drawn) {
+        render_pet(&pet);
+        drawn = true;
+    }
+}
 
 // Returns true while the boot logo still owns the screen.
 static bool render_splash(void) {
