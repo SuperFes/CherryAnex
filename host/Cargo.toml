@@ -1,0 +1,9 @@
+[package]
+name = "anex-host"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+chrono = { version = "0.4.45", default-features = false, features = ["clock"] }
+hidapi = { version = "2.6.7", default-features = false, features = ["linux-static-hidraw"] }
+sysinfo = { version = "0.40.1", default-features = false, features = ["system"] }
