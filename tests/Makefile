@@ -9,6 +9,7 @@ CFLAGS := -std=c11 -Wall -Wextra -Werror -O1 -g -I$(KEYMAP) -I.
 TESTS := $(patsubst test_%.c,%,$(wildcard test_*.c))
 
 DEPS_saver := canvas
+DEPS_runner := canvas
 
 .PHONY: all clean
 all: $(addprefix run-,$(TESTS))
