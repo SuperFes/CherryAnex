@@ -44,6 +44,25 @@ static void test_lock_line_all_off(void) {
     CHECK(line.invert == 0);
 }
 
+static void test_count_line(void) {
+    status_line_t line;
+    status_count_line(&line, 12345678, 1234);
+    CHECK_STR(line.text, "ALL 12345678 NOW 1234");
+    CHECK(line.invert == 0);
+    status_count_line(&line, 0, 0);
+    CHECK_STR(line.text, "ALL 0        NOW 0   ");
+}
+
+static void test_count_line_shortens_large_counts(void) {
+    status_line_t line;
+    status_count_line(&line, 123456789, 12345);
+    CHECK_STR(line.text, "ALL 123456k  NOW 12k ");
+    status_count_line(&line, 4294967295u, 1234567);
+    CHECK_STR(line.text, "ALL 4294967k NOW 1M  ");
+    status_count_line(&line, 999999999, 9999999);
+    CHECK_STR(line.text, "ALL 999999k  NOW 9M  ");
+}
+
 int main(void) {
     test_layer_names();
     test_layer_line_without_mods();
@@ -51,5 +70,7 @@ int main(void) {
     test_longest_layer_name_stays_in_tab();
     test_lock_line();
     test_lock_line_all_off();
+    test_count_line();
+    test_count_line_shortens_large_counts();
     return CHECK_DONE();
 }

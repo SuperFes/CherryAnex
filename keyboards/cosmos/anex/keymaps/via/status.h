@@ -33,3 +33,6 @@ void status_layer_line(status_line_t *line, uint8_t layer, status_mods_t mods);
 
 // Lock key labels, inverted while the lock is on.
 void status_lock_line(status_line_t *line, status_locks_t locks);
+
+// Lifetime and per-boot keypress counts, shortened with k/M/G when too long.
+void status_count_line(status_line_t *line, uint32_t total, uint32_t session);
