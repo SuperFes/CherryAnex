@@ -1,3 +1,4 @@
 *.uf2
 *.kra~
 __pycache__/
+art/badwords.txt

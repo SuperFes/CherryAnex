@@ -1,0 +1,7 @@
+# Copy to badwords.txt (ignored by git) and run tools/badwords.py.
+# One lowercase word per line. A trailing * also matches longer words starting
+# with it (stems need 3+ letters); without it only the exact word matches, so
+# "hell" doesn't catch "hello".
+heck
+frick*
+darn*
