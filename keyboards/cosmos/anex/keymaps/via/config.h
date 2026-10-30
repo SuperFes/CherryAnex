@@ -11,3 +11,7 @@
 
 // Lifetime keypress total.
 #define EECONFIG_USER_DATA_SIZE 4
+
+// QMK's WPM smoothing overshoots when the main loop runs slower than its
+// 100ms window (OLED flushes), wrapping the uint8 result to ~255.
+#define WPM_UNFILTERED
