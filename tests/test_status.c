@@ -33,15 +33,39 @@ static void test_longest_layer_name_stays_in_tab(void) {
 
 static void test_lock_line(void) {
     status_line_t line;
-    status_lock_line(&line, (status_locks_t){.caps = true, .scroll = true});
-    CHECK_STR(line.text, "CAPS    NUM      SCRL");
-    CHECK(line.invert == (span(0, 4) | span(17, 4)));
+    status_lock_line(&line, (status_locks_t){.caps = true, .scroll = true}, NULL);
+    CHECK_STR(line.text, "CAPS NUM SCRL        ");
+    CHECK(line.invert == (span(0, 4) | span(9, 4)));
+}
+
+static void test_lock_line_with_clock(void) {
+    status_line_t line;
+    status_lock_line(&line, (status_locks_t){.num = true}, &(status_pc_t){.hour = 9, .minute = 5});
+    CHECK_STR(line.text, "CAPS NUM SCRL   09:05");
+    CHECK(line.invert == span(5, 3));
 }
 
 static void test_lock_line_all_off(void) {
     status_line_t line;
-    status_lock_line(&line, (status_locks_t){0});
+    status_lock_line(&line, (status_locks_t){0}, NULL);
     CHECK(line.invert == 0);
+}
+
+static void test_wpm_line_with_peak(void) {
+    status_line_t line;
+    status_wpm_line(&line, 5, 123, NULL);
+    CHECK_STR(line.text, "WPM   5     PEAK 123 ");
+    status_wpm_line(&line, 0, 0, NULL);
+    CHECK_STR(line.text, "WPM   0     PEAK   0 ");
+}
+
+static void test_wpm_line_with_pc(void) {
+    status_line_t line;
+    status_wpm_line(&line, 87, 200, &(status_pc_t){.cpu = 7, .ram = 64});
+    CHECK_STR(line.text, "WPM  87 CPU  7 RAM 64");
+    // 100% doesn't fit in two columns.
+    status_wpm_line(&line, 240, 0, &(status_pc_t){.cpu = 100, .ram = 100});
+    CHECK_STR(line.text, "WPM 240 CPU 99 RAM 99");
 }
 
 static void test_count_line(void) {
@@ -77,6 +101,9 @@ int main(void) {
     test_longest_layer_name_stays_in_tab();
     test_lock_line();
     test_lock_line_all_off();
+    test_lock_line_with_clock();
+    test_wpm_line_with_peak();
+    test_wpm_line_with_pc();
     test_count_line();
     test_count_line_shortens_large_counts();
     test_score_line();

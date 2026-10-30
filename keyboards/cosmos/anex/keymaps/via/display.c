@@ -7,6 +7,7 @@
 #include "splash.h"
 #include "stats.h"
 #include "game.h"
+#include "pc.h"
 
 // 128 samples at this interval is about a minute of history.
 #define WPM_SAMPLE_INTERVAL_MS 500
@@ -28,6 +29,18 @@ static void write_status_line(const status_line_t *line) {
     }
 }
 
+// NULL while the anex-host app isn't running.
+static const status_pc_t *pc_stats(void) {
+    static status_pc_t stats;
+    const pc_view_t   *pc = pc_view();
+
+    if (!pc->connected) {
+        return NULL;
+    }
+    stats = (status_pc_t){.hour = pc->hour, .minute = pc->minute, .cpu = pc->cpu, .ram = pc->ram};
+    return &stats;
+}
+
 // Two text rows plus a rule; side-specific content starts on row 3.
 static void render_status_strip(void) {
     status_line_t line;
@@ -43,7 +56,7 @@ static void render_status_strip(void) {
                           .gui   = mods & MOD_MASK_GUI,
                       });
     write_status_line(&line);
-    status_lock_line(&line, (status_locks_t){.caps = leds.caps_lock, .num = leds.num_lock, .scroll = leds.scroll_lock});
+    status_lock_line(&line, (status_locks_t){.caps = leds.caps_lock, .num = leds.num_lock, .scroll = leds.scroll_lock}, pc_stats());
     write_status_line(&line);
 
     for (uint16_t x = 0; x < OLED_DISPLAY_WIDTH; ++x) {
@@ -69,16 +82,15 @@ static void render_left(void) {
     static graph_t  history;
     static uint8_t  peak;
     static uint32_t last_sample;
+    status_line_t   line;
     uint8_t         wpm = get_current_wpm();
 
     if (wpm > peak) {
         peak = wpm;
     }
+    status_wpm_line(&line, wpm, peak, pc_stats());
     oled_set_cursor(0, 3);
-    oled_write_P(PSTR("WPM "), false);
-    oled_write(get_u8_str(wpm, ' '), false);
-    oled_write_P(PSTR("     PEAK "), false);
-    oled_write(get_u8_str(peak, ' '), false);
+    write_status_line(&line);
 
     bool sample = timer_elapsed32(last_sample) >= WPM_SAMPLE_INTERVAL_MS;
     if (sample) {

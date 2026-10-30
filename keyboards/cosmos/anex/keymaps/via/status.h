@@ -26,13 +26,25 @@ typedef struct {
     bool scroll;
 } status_locks_t;
 
+// PC stats from the anex-host app.
+typedef struct {
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t cpu;
+    uint8_t ram;
+} status_pc_t;
+
 const char *status_layer_name(uint8_t layer);
 
 // Layer name as an inverted tab on the left, mod letters on the right.
 void status_layer_line(status_line_t *line, uint8_t layer, status_mods_t mods);
 
-// Lock key labels, inverted while the lock is on.
-void status_lock_line(status_line_t *line, status_locks_t locks);
+// Lock key labels, inverted while the lock is on, plus the PC's clock when
+// pc is not NULL.
+void status_lock_line(status_line_t *line, status_locks_t locks, const status_pc_t *pc);
+
+// WPM with the session peak, or with CPU/RAM usage when pc is not NULL.
+void status_wpm_line(status_line_t *line, uint8_t wpm, uint8_t peak, const status_pc_t *pc);
 
 // Lifetime and per-boot keypress counts, shortened with k/M/G when too long.
 void status_count_line(status_line_t *line, uint32_t total, uint32_t session);

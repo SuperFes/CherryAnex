@@ -47,11 +47,51 @@ void status_layer_line(status_line_t *line, uint8_t layer, status_mods_t mods) {
     line_put(line, first + 6, "G", mods.gui);
 }
 
-void status_lock_line(status_line_t *line, status_locks_t locks) {
+// Right-aligned in width columns, clamped to the largest value that fits.
+static void line_put_right(status_line_t *line, uint8_t col, uint16_t value, uint8_t width) {
+    uint16_t max = 1;
+    for (uint8_t i = 0; i < width; ++i) {
+        max *= 10;
+    }
+    if (value >= max) {
+        value = max - 1;
+    }
+    for (uint8_t i = width; i; --i) {
+        line->text[col + i - 1] = (i == width || value) ? '0' + value % 10 : ' ';
+        value /= 10;
+    }
+}
+
+static void line_put_two_digits(status_line_t *line, uint8_t col, uint8_t value) {
+    line->text[col]     = '0' + value / 10 % 10;
+    line->text[col + 1] = '0' + value % 10;
+}
+
+void status_lock_line(status_line_t *line, status_locks_t locks, const status_pc_t *pc) {
     line_clear(line);
     line_put(line, 0, "CAPS", locks.caps);
-    line_put(line, 8, "NUM", locks.num);
-    line_put(line, 17, "SCRL", locks.scroll);
+    line_put(line, 5, "NUM", locks.num);
+    line_put(line, 9, "SCRL", locks.scroll);
+    if (pc) {
+        line_put_two_digits(line, 16, pc->hour);
+        line->text[18] = ':';
+        line_put_two_digits(line, 19, pc->minute);
+    }
+}
+
+void status_wpm_line(status_line_t *line, uint8_t wpm, uint8_t peak, const status_pc_t *pc) {
+    line_clear(line);
+    line_put(line, 0, "WPM", false);
+    line_put_right(line, 4, wpm, 3);
+    if (pc) {
+        line_put(line, 8, "CPU", false);
+        line_put_right(line, 12, pc->cpu, 2);
+        line_put(line, 15, "RAM", false);
+        line_put_right(line, 19, pc->ram, 2);
+    } else {
+        line_put(line, 12, "PEAK", false);
+        line_put_right(line, 17, peak, 3);
+    }
 }
 
 static uint8_t digits(uint32_t value) {
