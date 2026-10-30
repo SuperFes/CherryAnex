@@ -162,22 +162,6 @@ bool snake_dir_for_usage(uint8_t usage, snake_dir_t *dir) {
     }
 }
 
-#define BEST_CHECK 0xA55A
-
-void snake_best_pack(uint16_t best, uint8_t out[SNAKE_BEST_BYTES]) {
-    uint16_t check = best ^ BEST_CHECK;
-    out[0]         = best & 0xFF;
-    out[1]         = best >> 8;
-    out[2]         = check & 0xFF;
-    out[3]         = check >> 8;
-}
-
-uint16_t snake_best_unpack(const uint8_t in[SNAKE_BEST_BYTES]) {
-    uint16_t best  = in[0] | (uint16_t)in[1] << 8;
-    uint16_t check = in[2] | (uint16_t)in[3] << 8;
-    return (best ^ BEST_CHECK) == check ? best : 0;
-}
-
 uint8_t snake_page_byte(const snake_t *snake, uint8_t x, uint8_t page) {
     uint8_t col = x / SNAKE_CELL_PX;
     uint8_t sub = x % SNAKE_CELL_PX;

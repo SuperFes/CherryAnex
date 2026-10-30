@@ -47,8 +47,8 @@ static void send_sync(void) {
 }
 
 static void save_best(void) {
-    uint8_t bytes[SNAKE_BEST_BYTES];
-    snake_best_pack(view.best, bytes);
+    uint8_t bytes[STORAGE_CHECKED_BYTES];
+    storage_pack(view.best, bytes);
     eeconfig_update_user_datablock(bytes, STORAGE_SNAKE_BEST_OFFSET, sizeof(bytes));
 }
 
@@ -58,9 +58,9 @@ static void new_round(void) {
 }
 
 void game_init(void) {
-    uint8_t bytes[SNAKE_BEST_BYTES];
+    uint8_t bytes[STORAGE_CHECKED_BYTES];
     eeconfig_read_user_datablock(bytes, STORAGE_SNAKE_BEST_OFFSET, sizeof(bytes));
-    view.best = snake_best_unpack(bytes);
+    view.best = storage_unpack(bytes);
     transaction_register_rpc(USER_SYNC_GAME, receive_sync);
 }
 

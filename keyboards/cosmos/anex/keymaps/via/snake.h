@@ -66,10 +66,5 @@ bool     snake_occupied(const snake_t *snake, uint8_t x, uint8_t y);
 // Maps arrow keys and WASD (HID keyboard usage IDs) to a direction.
 bool snake_dir_for_usage(uint8_t usage, snake_dir_t *dir);
 
-// Stored best score, with a check word so unwritten storage reads as 0.
-#define SNAKE_BEST_BYTES 4
-void     snake_best_pack(uint16_t best, uint8_t out[SNAKE_BEST_BYTES]);
-uint16_t snake_best_unpack(const uint8_t in[SNAKE_BEST_BYTES]);
-
 // Display byte for pixel column x of page (SSD1306 page format).
 uint8_t snake_page_byte(const snake_t *snake, uint8_t x, uint8_t page);
