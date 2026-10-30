@@ -5,6 +5,7 @@
 #include "pet.h"
 #include "pet_sprites.h"
 #include "splash.h"
+#include "stats.h"
 
 // 128 samples at this interval is about a minute of history.
 #define WPM_SAMPLE_INTERVAL_MS 500
@@ -96,8 +97,14 @@ static void render_pet(const pet_t *pet) {
 }
 
 static void render_right(void) {
-    static pet_t pet;
-    static bool  drawn;
+    static pet_t       pet;
+    static bool        drawn;
+    status_line_t      line;
+    const keycount_t  *count = stats_keycount();
+
+    status_count_line(&line, count->total, count->session);
+    oled_set_cursor(0, 3);
+    write_status_line(&line);
 
     if (pet_update(&pet, get_current_wpm(), last_input_activity_elapsed(), timer_read32()) || !drawn) {
         render_pet(&pet);
