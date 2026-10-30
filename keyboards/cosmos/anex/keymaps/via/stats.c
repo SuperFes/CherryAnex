@@ -45,21 +45,20 @@ static void send_sync(void) {
     }
 }
 
-void keyboard_post_init_user(void) {
+void stats_init(void) {
     uint32_t stored;
     eeconfig_read_user_datablock(&stored, 0, sizeof(stored));
     keycount_init(&keycount, stored);
     transaction_register_rpc(USER_SYNC_KEYCOUNT, receive_sync);
 }
 
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+void stats_record(keyrecord_t *record) {
     if (record->event.pressed) {
         keycount_press(&keycount, timer_read32());
     }
-    return true;
 }
 
-void housekeeping_task_user(void) {
+void stats_task(void) {
     if (!is_keyboard_master()) {
         return;
     }
@@ -70,9 +69,8 @@ void housekeeping_task_user(void) {
 }
 
 // Keeps presses since the last save when rebooting or entering the bootloader.
-bool shutdown_user(bool jump_to_bootloader) {
+void stats_shutdown(void) {
     if (is_keyboard_master() && keycount.total != keycount.saved) {
         save();
     }
-    return true;
 }
