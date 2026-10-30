@@ -104,11 +104,16 @@ static void render_pet(const pet_t *pet) {
 }
 
 static void render_right(void) {
-    static pet_t      pet;
-    status_line_t     line;
-    const keycount_t *count = stats_keycount();
+    static pet_t       pet;
+    status_line_t      line;
+    const keycount_t  *count = stats_keycount();
+    const game_view_t *game  = game_view();
 
-    status_count_line(&line, count->total, count->session);
+    if (game->active) {
+        status_score_line(&line, game->score, game->best);
+    } else {
+        status_count_line(&line, count->total, count->session);
+    }
     oled_set_cursor(0, 3);
     write_status_line(&line);
 
@@ -162,8 +167,8 @@ bool oled_task_user(void) {
         return false;
     }
     // The game runs where the keys are processed.
-    if (is_keyboard_master() && game_active()) {
-        if (game_task() || !gaming) {
+    if (is_keyboard_master() && game_view()->active) {
+        if (game_take_dirty() || !gaming) {
             render_game();
         }
         gaming = true;

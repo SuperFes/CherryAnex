@@ -63,6 +63,13 @@ static void test_count_line_shortens_large_counts(void) {
     CHECK_STR(line.text, "ALL 999999k  NOW 9M  ");
 }
 
+static void test_score_line(void) {
+    status_line_t line;
+    status_score_line(&line, 12, 345);
+    CHECK_STR(line.text, "SCORE 12    BEST 345 ");
+    CHECK(line.invert == 0);
+}
+
 int main(void) {
     test_layer_names();
     test_layer_line_without_mods();
@@ -72,5 +79,6 @@ int main(void) {
     test_lock_line_all_off();
     test_count_line();
     test_count_line_shortens_large_counts();
+    test_score_line();
     return CHECK_DONE();
 }

@@ -89,3 +89,11 @@ void status_count_line(status_line_t *line, uint32_t total, uint32_t session) {
     line_put(line, 13, "NOW", false);
     line_put_count(line, 17, session, 4);
 }
+
+void status_score_line(status_line_t *line, uint16_t score, uint16_t best) {
+    line_clear(line);
+    line_put(line, 0, "SCORE", false);
+    line_put_count(line, 6, score, 4);
+    line_put(line, 12, "BEST", false);
+    line_put_count(line, 17, best, 4);
+}

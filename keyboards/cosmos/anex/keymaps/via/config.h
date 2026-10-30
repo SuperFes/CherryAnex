@@ -7,10 +7,12 @@
 #define SPLIT_OLED_ENABLE
 #define SPLIT_WPM_ENABLE
 #define SPLIT_ACTIVITY_ENABLE
-#define SPLIT_TRANSACTION_IDS_USER USER_SYNC_KEYCOUNT
+#define SPLIT_TRANSACTION_IDS_USER USER_SYNC_KEYCOUNT, USER_SYNC_GAME
 
-// Lifetime keypress total.
-#define EECONFIG_USER_DATA_SIZE 4
+// See storage.h. The version stays at the original block size so growing the
+// block keeps the stored keypress total; later fields carry their own check.
+#define EECONFIG_USER_DATA_SIZE 8
+#define EECONFIG_USER_DATA_VERSION 4
 
 // QMK's WPM smoothing overshoots when the main loop runs slower than its
 // 100ms window (OLED flushes), wrapping the uint8 result to ~255.

@@ -6,6 +6,7 @@
 
 void keyboard_post_init_user(void) {
     stats_init();
+    game_init();
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -15,6 +16,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 void housekeeping_task_user(void) {
     stats_task();
+    game_task();
 }
 
 bool shutdown_user(bool jump_to_bootloader) {

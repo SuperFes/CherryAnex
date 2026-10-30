@@ -1,8 +1,9 @@
 #include QMK_KEYBOARD_H
 #include "stats.h"
+#include "storage.h"
 #include "transactions.h"
 
-_Static_assert(EECONFIG_USER_DATA_SIZE >= sizeof(uint32_t), "keypress total needs the user datablock");
+_Static_assert(EECONFIG_USER_DATA_SIZE >= STORAGE_SIZE, "storage.h layout exceeds the user datablock");
 
 #define SYNC_INTERVAL_MS 500
 
@@ -18,7 +19,7 @@ const keycount_t *stats_keycount(void) {
 }
 
 static void save(void) {
-    eeconfig_update_user_datablock(&keycount.total, 0, sizeof(keycount.total));
+    eeconfig_update_user_datablock(&keycount.total, STORAGE_KEYCOUNT_OFFSET, sizeof(keycount.total));
     keycount_mark_saved(&keycount);
 }
 
@@ -47,7 +48,7 @@ static void send_sync(void) {
 
 void stats_init(void) {
     uint32_t stored;
-    eeconfig_read_user_datablock(&stored, 0, sizeof(stored));
+    eeconfig_read_user_datablock(&stored, STORAGE_KEYCOUNT_OFFSET, sizeof(stored));
     keycount_init(&keycount, stored);
     transaction_register_rpc(USER_SYNC_KEYCOUNT, receive_sync);
 }

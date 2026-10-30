@@ -158,6 +158,23 @@ static void test_direction_keys(void) {
     CHECK(!snake_dir_for_usage(0x29, &dir)); // Esc
 }
 
+static void test_best_round_trips(void) {
+    uint8_t bytes[SNAKE_BEST_BYTES];
+    snake_best_pack(321, bytes);
+    CHECK(snake_best_unpack(bytes) == 321);
+    snake_best_pack(0, bytes);
+    CHECK(snake_best_unpack(bytes) == 0);
+}
+
+static void test_best_ignores_unwritten_storage(void) {
+    const uint8_t erased[SNAKE_BEST_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF};
+    const uint8_t zeroed[SNAKE_BEST_BYTES] = {0x00, 0x00, 0x00, 0x00};
+    const uint8_t stale[SNAKE_BEST_BYTES]  = {0x12, 0x34, 0x56, 0x78};
+    CHECK(snake_best_unpack(erased) == 0);
+    CHECK(snake_best_unpack(zeroed) == 0);
+    CHECK(snake_best_unpack(stale) == 0);
+}
+
 int main(void) {
     test_init();
     test_first_turn_starts_and_steps_on_interval();
@@ -169,5 +186,7 @@ int main(void) {
     test_food_avoids_body();
     test_page_bytes();
     test_direction_keys();
+    test_best_round_trips();
+    test_best_ignores_unwritten_storage();
     return CHECK_DONE();
 }
