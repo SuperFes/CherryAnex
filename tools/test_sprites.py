@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import sprites as s  # noqa: E402
 
 RUNNER_SHEET = s.ROOT / "art/runner.txt"
+PETFX_SHEET = s.ROOT / "art/pet_fx.txt"
 
 SHEET = """
 ; comment
@@ -76,11 +77,12 @@ class RepoFilesTest(unittest.TestCase):
     def test_pet_sprites_are_32_square(self):
         self.assertEqual(s.size(s.parse(s.DEFAULT_SHEET.read_text())), (32, 32))
 
-    def test_runner_sprites_are_16_square(self):
-        self.assertEqual(s.size(s.parse(RUNNER_SHEET.read_text())), (16, 16))
+    def test_runner_and_effect_sprites_are_16_square(self):
+        for sheet in (RUNNER_SHEET, PETFX_SHEET):
+            self.assertEqual(s.size(s.parse(sheet.read_text())), (16, 16), sheet.name)
 
     def test_committed_headers_are_current(self):
-        for sheet, prefix in ((s.DEFAULT_SHEET, s.DEFAULT_PREFIX), (RUNNER_SHEET, "runner")):
+        for sheet, prefix in ((s.DEFAULT_SHEET, s.DEFAULT_PREFIX), (RUNNER_SHEET, "runner"), (PETFX_SHEET, "petfx")):
             for name, text in s.generate(sheet, prefix).items():
                 self.assertEqual((s.KEYMAP / name).read_text(), text, f"{name}: run tools/sprites.py")
 

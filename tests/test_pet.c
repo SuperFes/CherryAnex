@@ -1,5 +1,6 @@
 #include "pet.h"
 #include "pet_sprite_ids.h"
+#include "petfx_sprite_ids.h"
 #include "check.h"
 
 static void test_mood_thresholds(void) {
@@ -63,6 +64,71 @@ static void test_every_sprite_index_is_valid(void) {
     }
 }
 
+static void test_hop_arcs_and_lands(void) {
+    pet_t pet = {.mood = PET_IDLE};
+    pet_react(&pet, PET_REACT_HOP, 1000);
+    CHECK(pet_animating(&pet, 1000));
+    CHECK(pet_pose(&pet, 1150).dy < -3);
+    CHECK(pet_pose(&pet, 1300).dy == 0);
+    CHECK(!pet_animating(&pet, 1300));
+}
+
+static void test_swearing_freezes_and_outranks_hops(void) {
+    pet_t pet = {.mood = PET_WALK};
+    pet_react(&pet, PET_REACT_GRAWLIX, 0);
+    pet_react(&pet, PET_REACT_HOP, 10);
+    CHECK(pet.reaction == PET_REACT_GRAWLIX);
+    pet_pose_t pose = pet_pose(&pet, 100);
+    CHECK(pose.sprite == PET_SPRITE_FLUSTERED);
+    CHECK(pose.fx == PETFX_SPRITE_GRAWLIX);
+    CHECK(pet_update(&pet, 20, 0, 220));
+    CHECK(pet.x == 0);
+    // A new swear replaces the current one.
+    pet_react(&pet, PET_REACT_FAINT, 300);
+    CHECK(pet_pose(&pet, 400).sprite == PET_SPRITE_FAINT);
+    CHECK(!pet_animating(&pet, 400));
+}
+
+static void test_reaction_expiry_redraws(void) {
+    pet_t pet = {.mood = PET_IDLE};
+    pet_react(&pet, PET_REACT_SOAP, 0);
+    CHECK(pet_pose(&pet, 100).fx == PETFX_SPRITE_SOAP_1);
+    CHECK(pet_pose(&pet, 400).fx == PETFX_SPRITE_SOAP_2);
+    CHECK(pet_update(&pet, 0, 0, 2500));
+    CHECK(pet.reaction == PET_REACT_NONE);
+    CHECK(pet_pose(&pet, 2500).fx == -1);
+}
+
+static void test_panic_outranks_sneak(void) {
+    pet_t pet = {.mood = PET_IDLE};
+    pet_hold(&pet, true, true);
+    pet_pose_t pose = pet_pose(&pet, 0);
+    CHECK(pose.sprite == PET_SPRITE_PANIC);
+    CHECK(pose.fx == PETFX_SPRITE_ALERT);
+    CHECK(pet_animating(&pet, 0));
+    CHECK(pet_pose(&pet, 0).dx != pet_pose(&pet, 50).dx);
+}
+
+static void test_sneak_crouches_and_creeps(void) {
+    pet_t pet = {.mood = PET_WALK};
+    pet_hold(&pet, true, false);
+    uint8_t first = pet_pose(&pet, 0).sprite;
+    CHECK(first == PET_SPRITE_CROUCH_1);
+    CHECK(pet_update(&pet, 20, 0, 220));
+    CHECK(pet.x == 1);
+    CHECK(pet_pose(&pet, 220).sprite == PET_SPRITE_CROUCH_2);
+}
+
+static void test_sweat_drop_slides_down(void) {
+    pet_t pet = {.mood = PET_IDLE};
+    pet_react(&pet, PET_REACT_SWEAT, 0);
+    pet_pose_t start = pet_pose(&pet, 0);
+    pet_pose_t later = pet_pose(&pet, 1000);
+    CHECK(start.fx == PETFX_SPRITE_SWEAT);
+    CHECK(later.fx_y > start.fx_y);
+    CHECK(pet_pose(&pet, 1500).fx == -1);
+}
+
 int main(void) {
     test_mood_thresholds();
     test_mood_change_restarts_animation();
@@ -71,5 +137,11 @@ int main(void) {
     test_idle_stays_put_and_blinks_last();
     test_timer_wraparound();
     test_every_sprite_index_is_valid();
+    test_hop_arcs_and_lands();
+    test_swearing_freezes_and_outranks_hops();
+    test_reaction_expiry_redraws();
+    test_panic_outranks_sneak();
+    test_sneak_crouches_and_creeps();
+    test_sweat_drop_slides_down();
     return CHECK_DONE();
 }
