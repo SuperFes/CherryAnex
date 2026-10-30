@@ -7,7 +7,7 @@
 #define SPLIT_OLED_ENABLE
 #define SPLIT_WPM_ENABLE
 #define SPLIT_ACTIVITY_ENABLE
-#define SPLIT_TRANSACTION_IDS_USER USER_SYNC_KEYCOUNT, USER_SYNC_GAME
+#define SPLIT_TRANSACTION_IDS_USER USER_SYNC_KEYCOUNT, USER_SYNC_GAME, USER_SYNC_HOST
 
 // See storage.h. The version stays at the original block size so growing the
 // block keeps the stored keypress total; later fields carry their own check.
