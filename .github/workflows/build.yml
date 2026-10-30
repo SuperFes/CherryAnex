@@ -6,6 +6,17 @@ on:
 permissions:
   contents: write
 jobs:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+      - run: pip install pillow pytest
+      - run: python -m pytest -q tools
+      - run: make -C tests
   build:
     name: QMK Userspace Build
     uses: qmk/.github/.github/workflows/qmk_userspace_build.yml@main

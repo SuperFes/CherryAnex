@@ -1,0 +1,3 @@
+-std=c11
+-I.
+-I../keyboards/cosmos/anex/keymaps/via
