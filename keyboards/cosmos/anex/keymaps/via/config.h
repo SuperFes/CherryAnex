@@ -7,3 +7,6 @@
 #define SPLIT_OLED_ENABLE
 #define SPLIT_WPM_ENABLE
 #define SPLIT_ACTIVITY_ENABLE
+
+// Lifetime keypress total.
+#define EECONFIG_USER_DATA_SIZE 4
