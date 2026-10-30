@@ -6,7 +6,7 @@
 
 #define EE_HANDS
 
-#define VIK_SPI_DRIVER   SPID0
+#define VIK_SPI_DRIVER   SPID1
 #define VIK_SPI_SCK_PIN  GP14
 #define VIK_SPI_MOSI_PIN GP15
 #define VIK_SPI_MISO_PIN GP12
