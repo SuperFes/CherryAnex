@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_VIA = ROOT / "anex1_18.layout.json"
+DEFAULT_VIA = ROOT / "via-layout.json"
 DEFAULT_KEYBOARD = ROOT / "keyboards/cosmos/anex/keyboard.json"
 DEFAULT_OUT = ROOT / "keyboards/cosmos/anex/keymaps/via/keymap.c"
 

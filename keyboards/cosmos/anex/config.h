@@ -30,9 +30,4 @@
 
 #define USB_POLLING_INTERVAL_MS 1
 
-#define LOCKING_SUPPORT_ENABLE
-
-/* Locking resynchronize hack */
-#define LOCKING_RESYNC_ENABLE
-
 #include "keyboards/cosmos/anex/vik/config.vik.post.h"
