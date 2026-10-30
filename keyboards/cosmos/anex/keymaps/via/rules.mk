@@ -1,3 +1,3 @@
 VIA_ENABLE = yes
 
-SRC += user.c
+SRC += display.c
