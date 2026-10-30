@@ -1,10 +1,19 @@
 #include QMK_KEYBOARD_H
 #include "logo.h"
 #include "status.h"
+#include "graph.h"
 
 #ifndef SPLASH_DURATION_MS
 #    define SPLASH_DURATION_MS 2500
 #endif
+
+// 128 samples at this interval is about a minute of history.
+#define WPM_SAMPLE_INTERVAL_MS 500
+// Graph occupies the bottom four pages (32px).
+#define WPM_GRAPH_FIRST_PAGE 4
+#define WPM_GRAPH_PAGES 4
+// Floor for the graph's full scale so slow typing doesn't look frantic.
+#define WPM_GRAPH_MIN_SCALE 40
 
 static void write_status_line(const status_line_t *line) {
     // 21 columns fill the row, so the cursor wraps to the next line by itself.
@@ -36,7 +45,41 @@ static void render_status_strip(void) {
     }
 }
 
-static void render_left(void) {}
+static void render_wpm_graph(const graph_t *history) {
+    uint8_t scale = graph_max(history);
+    if (scale < WPM_GRAPH_MIN_SCALE) {
+        scale = WPM_GRAPH_MIN_SCALE;
+    }
+    // Newest sample at the right edge.
+    for (uint8_t x = 0; x < GRAPH_SAMPLES; ++x) {
+        uint8_t height = graph_bar_height(graph_at(history, GRAPH_SAMPLES - 1 - x), scale, WPM_GRAPH_PAGES * 8);
+        for (uint8_t page = 0; page < WPM_GRAPH_PAGES; ++page) {
+            oled_write_raw_byte(graph_page_byte(height, page, WPM_GRAPH_PAGES), (WPM_GRAPH_FIRST_PAGE + page) * OLED_DISPLAY_WIDTH + x);
+        }
+    }
+}
+
+static void render_left(void) {
+    static graph_t  history;
+    static uint8_t  peak;
+    static uint32_t last_sample;
+    uint8_t         wpm = get_current_wpm();
+
+    if (wpm > peak) {
+        peak = wpm;
+    }
+    oled_set_cursor(0, 3);
+    oled_write_P(PSTR("WPM "), false);
+    oled_write(get_u8_str(wpm, ' '), false);
+    oled_write_P(PSTR("     PEAK "), false);
+    oled_write(get_u8_str(peak, ' '), false);
+
+    if (timer_elapsed32(last_sample) >= WPM_SAMPLE_INTERVAL_MS) {
+        last_sample = timer_read32();
+        graph_push(&history, wpm);
+        render_wpm_graph(&history);
+    }
+}
 
 static void render_right(void) {}
 
