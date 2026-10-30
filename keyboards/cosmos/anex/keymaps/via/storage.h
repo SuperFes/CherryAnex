@@ -8,7 +8,8 @@
 
 #define STORAGE_KEYCOUNT_OFFSET 0
 #define STORAGE_SNAKE_BEST_OFFSET 4
-#define STORAGE_SIZE 8
+#define STORAGE_SAVER_STYLE_OFFSET 8
+#define STORAGE_SIZE 12
 
 // A 16-bit value plus a check word, so storage that was never written (or
 // held something else before the block grew) reads back as 0.

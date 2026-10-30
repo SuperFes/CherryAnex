@@ -17,11 +17,15 @@ static int lit_count(void) {
     return n;
 }
 
-static void test_showing_rules(void) {
-    CHECK(!saver_showing(SAVER_AFTER_MS - 1, false, false));
-    CHECK(saver_showing(SAVER_AFTER_MS, false, false));
-    CHECK(!saver_showing(SAVER_AFTER_MS, false, true));
-    CHECK(saver_showing(0, true, false));
+static void test_screen_rules(void) {
+    CHECK(saver_screen(SAVER_AFTER_MS - 1, false, false) == SAVER_SCREEN_NORMAL);
+    CHECK(saver_screen(SAVER_AFTER_MS, false, false) == SAVER_SCREEN_SAVER);
+    CHECK(saver_screen(SAVER_AFTER_MS, false, true) == SAVER_SCREEN_NORMAL);
+    CHECK(saver_screen(0, true, false) == SAVER_SCREEN_SAVER);
+    CHECK(saver_screen(0, true, true) == SAVER_SCREEN_NORMAL);
+    CHECK(saver_screen(SAVER_OFF_AFTER_MS - 1, false, false) == SAVER_SCREEN_SAVER);
+    CHECK(saver_screen(SAVER_OFF_AFTER_MS, false, false) == SAVER_SCREEN_OFF);
+    CHECK(saver_screen(SAVER_OFF_AFTER_MS, true, true) == SAVER_SCREEN_OFF);
 }
 
 static void test_styles_cycle(void) {
@@ -82,7 +86,7 @@ static void test_pet_drawn_on_its_half(void) {
 }
 
 int main(void) {
-    test_showing_rules();
+    test_screen_rules();
     test_styles_cycle();
     test_stars_drift_left_and_wrap();
     test_stars_split_across_halves();

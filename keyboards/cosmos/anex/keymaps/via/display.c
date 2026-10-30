@@ -8,6 +8,7 @@
 #include "stats.h"
 #include "game.h"
 #include "pc.h"
+#include "screensaver.h"
 
 // 128 samples at this interval is about a minute of history.
 #define WPM_SAMPLE_INTERVAL_MS 500
@@ -18,6 +19,9 @@
 #define WPM_GRAPH_MIN_SCALE 40
 // Pet walks along the bottom four pages.
 #define PET_FIRST_PAGE 4
+
+// Screensaver frame rate, about 20 fps.
+#define SAVER_FRAME_MS 50
 
 // Set when the screen was cleared, so parts that only draw on change redraw.
 static bool redraw = true;
@@ -172,31 +176,90 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
     return OLED_ROTATION_180;
 }
 
+static void render_saver(void) {
+    static canvas_t canvas;
+    static uint32_t last_frame;
+
+    if (timer_elapsed32(last_frame) < SAVER_FRAME_MS && !redraw) {
+        return;
+    }
+    last_frame = timer_read32();
+
+    // Both halves draw from the split-synchronised clock so scenes line up.
+    uint32_t t    = sync_timer_read32();
+    uint8_t  half = is_keyboard_left() ? 0 : 1;
+    if (screensaver_view()->style == SAVER_PET) {
+        const uint8_t *const frames[2] = {
+            (const uint8_t *)pet_sprites[PET_SPRITE_SLEEP_1],
+            (const uint8_t *)pet_sprites[PET_SPRITE_SLEEP_2],
+        };
+        saver_draw_pet(&canvas, t, half, frames);
+    } else {
+        saver_draw_stars(&canvas, t, half);
+    }
+    for (uint16_t i = 0; i < CANVAS_BYTES; ++i) {
+        oled_write_raw_byte(canvas.bytes[i], i);
+    }
+}
+
+typedef enum {
+    SHOW_NORMAL,
+    SHOW_GAME,
+    SHOW_SAVER,
+    SHOW_OFF,
+} show_t;
+
+static show_t what_to_show(void) {
+    bool gaming = game_view()->active;
+    switch (saver_screen(last_input_activity_elapsed(), screensaver_view()->preview, gaming)) {
+        case SAVER_SCREEN_OFF:
+            return SHOW_OFF;
+        case SAVER_SCREEN_SAVER:
+            return SHOW_SAVER;
+        default:
+            // The game runs where the keys are processed.
+            return gaming && is_keyboard_master() ? SHOW_GAME : SHOW_NORMAL;
+    }
+}
+
 bool oled_task_user(void) {
-    static bool gaming;
+    static show_t showing = SHOW_NORMAL;
 
     if (render_splash()) {
         return false;
     }
-    // The game runs where the keys are processed.
-    if (is_keyboard_master() && game_view()->active) {
-        if (game_take_dirty() || !gaming) {
-            render_game();
+
+    show_t next = what_to_show();
+    if (next != showing) {
+        showing = next;
+        if (showing == SHOW_OFF) {
+            oled_off();
+        } else {
+            oled_clear();
+            redraw = true;
         }
-        gaming = true;
-        return false;
-    }
-    if (gaming) {
-        gaming = false;
-        oled_clear();
-        redraw = true;
     }
 
-    render_status_strip();
-    if (is_keyboard_left()) {
-        render_left();
-    } else {
-        render_right();
+    switch (showing) {
+        case SHOW_OFF:
+            // Drawing anything would switch the display back on.
+            break;
+        case SHOW_GAME:
+            if (game_take_dirty() || redraw) {
+                render_game();
+            }
+            break;
+        case SHOW_SAVER:
+            render_saver();
+            break;
+        default:
+            render_status_strip();
+            if (is_keyboard_left()) {
+                render_left();
+            } else {
+                render_right();
+            }
+            break;
     }
     redraw = false;
     return false;

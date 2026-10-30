@@ -11,6 +11,7 @@
 #include "canvas.h"
 
 #define SAVER_AFTER_MS 30000
+#define SAVER_OFF_AFTER_MS 300000
 #define SAVER_FIELD_WIDTH (2 * CANVAS_WIDTH)
 #define SAVER_STAR_COUNT 48
 #define SAVER_STAR_STEP_MS 50
@@ -25,8 +26,15 @@ typedef enum {
 
 saver_style_t saver_next_style(saver_style_t style);
 
-// preview shows the saver straight away, e.g. right after switching styles.
-bool saver_showing(uint32_t idle_ms, bool preview, bool game_active);
+typedef enum {
+    SAVER_SCREEN_NORMAL,
+    SAVER_SCREEN_SAVER,
+    SAVER_SCREEN_OFF,
+} saver_screen_t;
+
+// What the displays show after idle_ms without input. preview shows the saver
+// straight away, e.g. right after switching styles. A game keeps the saver away.
+saver_screen_t saver_screen(uint32_t idle_ms, bool preview, bool game_active);
 
 // Field position of star index at time t; stars drift right to left.
 void saver_star(uint8_t index, uint32_t t, uint16_t *x, uint8_t *y);

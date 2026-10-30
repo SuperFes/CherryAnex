@@ -3,16 +3,22 @@
 #include QMK_KEYBOARD_H
 #include "game.h"
 #include "pc.h"
+#include "screensaver.h"
 #include "stats.h"
 
 void keyboard_post_init_user(void) {
     stats_init();
     game_init();
     pc_init();
+    screensaver_init();
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     stats_record(record);
+    // The screensaver sees every key first, so any press ends its preview.
+    if (screensaver_record(keycode, record)) {
+        return false;
+    }
     return !game_record(keycode, record);
 }
 
@@ -20,6 +26,7 @@ void housekeeping_task_user(void) {
     stats_task();
     game_task();
     pc_task();
+    screensaver_task();
 }
 
 bool shutdown_user(bool jump_to_bootloader) {

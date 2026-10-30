@@ -13,8 +13,14 @@ saver_style_t saver_next_style(saver_style_t style) {
     return (style + 1) % SAVER_STYLES;
 }
 
-bool saver_showing(uint32_t idle_ms, bool preview, bool game_active) {
-    return preview || (!game_active && idle_ms >= SAVER_AFTER_MS);
+saver_screen_t saver_screen(uint32_t idle_ms, bool preview, bool game_active) {
+    if (idle_ms >= SAVER_OFF_AFTER_MS) {
+        return SAVER_SCREEN_OFF;
+    }
+    if (!game_active && (preview || idle_ms >= SAVER_AFTER_MS)) {
+        return SAVER_SCREEN_SAVER;
+    }
+    return SAVER_SCREEN_NORMAL;
 }
 
 static uint32_t mix(uint32_t h) {
