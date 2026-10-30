@@ -97,9 +97,10 @@ def render_data(prefix, sprites, width, height, source_name):
 
 def generate(sheet_path, prefix):
     """Return {output filename: text}."""
-    sprites = parse(Path(sheet_path).read_text())
+    sheet_path = Path(sheet_path).resolve()
+    sprites = parse(sheet_path.read_text())
     width, height = size(sprites)
-    source = Path(sheet_path).relative_to(ROOT) if Path(sheet_path).is_relative_to(ROOT) else Path(sheet_path).name
+    source = sheet_path.relative_to(ROOT) if sheet_path.is_relative_to(ROOT) else sheet_path.name
     return {
         f"{prefix}_sprite_ids.h": render_ids(prefix, sprites, width, height, source),
         f"{prefix}_sprites.h": render_data(prefix, sprites, width, height, source),
