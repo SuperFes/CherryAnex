@@ -7,6 +7,8 @@
 #include "graph.h"
 #include "pet.h"
 #include "pet_sprites.h"
+#include "petfx_sprites.h"
+#include "reactions.h"
 #include "runner_sprites.h"
 #include "splash.h"
 #include "stats.h"
@@ -23,6 +25,8 @@
 #define WPM_GRAPH_MIN_SCALE 40
 // Pet walks along the bottom four pages.
 #define PET_FIRST_PAGE 4
+// Redraw rate while the pet is mid-reaction.
+#define PET_FRAME_MS 40
 
 // Screensaver frame rate, about 20 fps.
 #define SAVER_FRAME_MS 50
@@ -113,24 +117,35 @@ static void render_left(void) {
     }
 }
 
-static void render_pet(const pet_t *pet) {
-    const char *sprite = pet_sprites[pet_sprite(pet)];
+static void render_pet(const pet_t *pet, uint32_t now) {
+    pet_pose_t pose = pet_pose(pet, now);
+    int16_t    top  = PET_FIRST_PAGE * 8;
 
-    for (uint8_t x = 0; x < PET_SCREEN_WIDTH; ++x) {
-        // Sprite column at this screen column, wrapping off the right edge.
-        uint8_t col = (x + PET_SCREEN_WIDTH - pet->x) % PET_SCREEN_WIDTH;
-        for (uint8_t page = 0; page < PET_SPRITE_HEIGHT / 8; ++page) {
-            uint8_t byte = col < PET_SPRITE_WIDTH ? pgm_read_byte(&sprite[page * PET_SPRITE_WIDTH + col]) : 0;
-            oled_write_raw_byte(byte, (PET_FIRST_PAGE + page) * OLED_DISPLAY_WIDTH + x);
+    canvas_clear(&canvas);
+    // Also drawn a screen-width either side, so the pet wraps around the edges.
+    for (int16_t wrap = -PET_SCREEN_WIDTH; wrap <= PET_SCREEN_WIDTH; wrap += PET_SCREEN_WIDTH) {
+        int16_t x = pet->x + pose.dx + wrap;
+        canvas_blit(&canvas, (const uint8_t *)pet_sprites[pose.sprite], PET_SPRITE_WIDTH, PET_SPRITE_HEIGHT, x, top + pose.dy);
+        if (pose.fx >= 0) {
+            canvas_blit(&canvas, (const uint8_t *)petfx_sprites[pose.fx], PETFX_SPRITE_WIDTH, PETFX_SPRITE_HEIGHT, x + pose.fx_x, top + pose.fx_y);
         }
+    }
+    // Only the pet's pages; the text rows above belong to the status strip.
+    for (uint16_t i = PET_FIRST_PAGE * OLED_DISPLAY_WIDTH; i < CANVAS_BYTES; ++i) {
+        oled_write_raw_byte(canvas.bytes[i], i);
     }
 }
 
 static void render_right(void) {
-    static pet_t       pet;
-    status_line_t      line;
-    const keycount_t  *count = stats_keycount();
-    const game_view_t *game  = game_view();
+    static pet_t            pet;
+    static uint8_t          seen_reaction;
+    static uint32_t         last_draw;
+    status_line_t           line;
+    const keycount_t       *count    = stats_keycount();
+    const game_view_t      *game     = game_view();
+    const reactions_view_t *reaction = reactions_view();
+    uint32_t                now      = timer_read32();
+    bool                    changed  = redraw;
 
     if (game->active) {
         status_score_line(&line, game->score, game->best);
@@ -140,8 +155,23 @@ static void render_right(void) {
     oled_set_cursor(0, 3);
     write_status_line(&line);
 
-    if (pet_update(&pet, get_current_wpm(), last_input_activity_elapsed(), timer_read32()) || redraw) {
-        render_pet(&pet);
+    if (reaction->seq != seen_reaction) {
+        seen_reaction = reaction->seq;
+        pet_react(&pet, reaction->reaction, now);
+        changed = true;
+    }
+    // Mods and LEDs are synced from the USB half, so either half can show them.
+    bool sneak = get_mods() & MOD_MASK_CTRL;
+    bool panic = host_keyboard_led_state().caps_lock;
+    if (sneak != pet.sneak || panic != pet.panic) {
+        pet_hold(&pet, sneak, panic);
+        changed = true;
+    }
+    changed |= pet_update(&pet, get_current_wpm(), last_input_activity_elapsed(), now);
+    changed |= pet_animating(&pet, now) && timer_elapsed32(last_draw) >= PET_FRAME_MS;
+    if (changed) {
+        render_pet(&pet, now);
+        last_draw = now;
     }
 }
 

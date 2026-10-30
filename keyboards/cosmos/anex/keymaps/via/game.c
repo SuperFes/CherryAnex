@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "keys.h"
 #include "storage.h"
 #include "transactions.h"
 
@@ -87,13 +88,6 @@ static void new_round(void) {
     dirty = true;
 }
 
-static uint8_t basic_keycode(uint16_t keycode) {
-    if (IS_QK_MOD_TAP(keycode) || IS_QK_LAYER_TAP(keycode) || IS_QK_MODS(keycode)) {
-        return keycode & 0xFF;
-    }
-    return keycode <= 0xFF ? keycode : KC_NO;
-}
-
 static void menu_key(uint8_t usage) {
     snake_dir_t dir;
     bool        is_dir = snake_dir_for_usage(usage, &dir);
@@ -147,7 +141,7 @@ bool game_record(uint16_t keycode, keyrecord_t *record) {
         return true;
     }
 
-    uint8_t  usage = basic_keycode(keycode);
+    uint8_t  usage = key_usage(keycode);
     uint32_t now   = timer_read32();
     if (keycode == GAME_TOGGLE || (usage == KC_ESC && view.menu)) {
         view.active = false;

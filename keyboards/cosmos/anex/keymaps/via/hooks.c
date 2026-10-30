@@ -3,6 +3,7 @@
 #include QMK_KEYBOARD_H
 #include "game.h"
 #include "pc.h"
+#include "reactions.h"
 #include "screensaver.h"
 #include "stats.h"
 
@@ -11,15 +12,17 @@ void keyboard_post_init_user(void) {
     game_init();
     pc_init();
     screensaver_init();
+    reactions_init();
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     stats_record(record);
     // The screensaver sees every key first, so any press ends its preview.
-    if (screensaver_record(keycode, record)) {
+    if (screensaver_record(keycode, record) || game_record(keycode, record)) {
         return false;
     }
-    return !game_record(keycode, record);
+    reactions_record(keycode, record);
+    return true;
 }
 
 void housekeeping_task_user(void) {
@@ -27,6 +30,7 @@ void housekeeping_task_user(void) {
     game_task();
     pc_task();
     screensaver_task();
+    reactions_task();
 }
 
 bool shutdown_user(bool jump_to_bootloader) {
