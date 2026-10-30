@@ -1,10 +1,5 @@
 #include QMK_KEYBOARD_H
 
-void keyboard_post_init_user(void) {
-    debug_enable=true;
-    debug_matrix=true;
-}
-
 #ifdef OLED_ENABLE
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
     return OLED_ROTATION_0;

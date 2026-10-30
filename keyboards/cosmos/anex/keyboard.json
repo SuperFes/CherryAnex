@@ -13,10 +13,11 @@
   "features": {
     "bootmagic": true,
     "rgb_matrix": true,
-    "console": true,
+    "console": false,
     "encoder": false,
     "encoder_map": false,
-    "extrakey": false,
+    "extrakey": true,
+    "mousekey": true,
     "oled": true
   },
   "matrix_pins": {

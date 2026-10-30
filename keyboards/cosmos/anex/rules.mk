@@ -4,6 +4,5 @@ VIK_ENABLE = yes
 
 include $(KEYBOARD_PATH_1)/vik/rules.mk
 
-OLED_ENABLE = yes
 OLED_DRIVER = ssd1306
 OLED_TRANSPORT = i2c
