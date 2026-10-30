@@ -11,7 +11,10 @@
 #include "canvas.h"
 
 #define SAVER_AFTER_MS 30000
-#define SAVER_OFF_AFTER_MS 300000
+// Overridden in config.h, which also ties the RGB timeout to it.
+#ifndef SAVER_OFF_AFTER_MS
+#    define SAVER_OFF_AFTER_MS 300000
+#endif
 #define SAVER_FIELD_WIDTH (2 * CANVAS_WIDTH)
 #define SAVER_STAR_COUNT 48
 #define SAVER_STAR_STEP_MS 50

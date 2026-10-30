@@ -21,3 +21,8 @@
 // Redrawing switches QMK's display timeout back on, so animated screens would
 // never sleep; display.c switches them off after SAVER_OFF_AFTER_MS instead.
 #define OLED_TIMEOUT 0
+
+// Screens and RGB sleep together. The RGB timeout only stops drawing, so the
+// saved effect and colours come back on the next keypress.
+#define SAVER_OFF_AFTER_MS 300000
+#define RGB_MATRIX_TIMEOUT SAVER_OFF_AFTER_MS
