@@ -63,5 +63,8 @@ uint16_t snake_step_ms(const snake_t *snake);
 bool     snake_can_restart(const snake_t *snake, uint32_t now);
 bool     snake_occupied(const snake_t *snake, uint8_t x, uint8_t y);
 
+// Maps arrow keys and WASD (HID keyboard usage IDs) to a direction.
+bool snake_dir_for_usage(uint8_t usage, snake_dir_t *dir);
+
 // Display byte for pixel column x of page (SSD1306 page format).
 uint8_t snake_page_byte(const snake_t *snake, uint8_t x, uint8_t page);

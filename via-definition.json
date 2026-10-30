@@ -8,6 +8,9 @@
   },
   "keycodes": ["qmk_lighting"],
   "menus": ["qmk_rgb_matrix"],
+  "customKeycodes": [
+    {"name": "Game", "title": "Toggle snake game", "shortName": "Game"}
+  ],
   "layouts": {
     "keymap": [
       [{"x": -0.5,"y": -0.5,"r": 0,"rx": 0.5,"ry": 0.5},"5,0"],

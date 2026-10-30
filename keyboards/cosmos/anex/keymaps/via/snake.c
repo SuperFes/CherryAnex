@@ -139,6 +139,29 @@ bool snake_update(snake_t *snake, uint32_t now) {
     return true;
 }
 
+bool snake_dir_for_usage(uint8_t usage, snake_dir_t *dir) {
+    switch (usage) {
+        case 0x52: // Up
+        case 0x1A: // W
+            *dir = SNAKE_UP;
+            return true;
+        case 0x4F: // Right
+        case 0x07: // D
+            *dir = SNAKE_RIGHT;
+            return true;
+        case 0x51: // Down
+        case 0x16: // S
+            *dir = SNAKE_DOWN;
+            return true;
+        case 0x50: // Left
+        case 0x04: // A
+            *dir = SNAKE_LEFT;
+            return true;
+        default:
+            return false;
+    }
+}
+
 uint8_t snake_page_byte(const snake_t *snake, uint8_t x, uint8_t page) {
     uint8_t col = x / SNAKE_CELL_PX;
     uint8_t sub = x % SNAKE_CELL_PX;

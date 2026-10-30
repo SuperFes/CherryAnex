@@ -63,10 +63,13 @@ LEGACY_ALIASES = {
 EMPTY_CODES = {"KC_NO", "KC_TRNS"}
 
 IDENT = re.compile(r"\b[A-Z_][A-Z0-9_]*\b")
+# VIA's CUSTOM(n) is the nth entry of the definition's customKeycodes.
+CUSTOM = re.compile(r"\bCUSTOM\(\s*(\d+)\s*\)")
 LAYER_REF = re.compile(r"\b(?:MO|TG|TO|TT|OSL|DF|PDF|LT|LM)\(\s*(\d+)")
 
 
 def translate(code):
+    code = CUSTOM.sub(lambda m: f"QK_KB_{m.group(1)}", code)
     return IDENT.sub(lambda m: LEGACY_ALIASES.get(m.group(0), m.group(0)), code)
 
 

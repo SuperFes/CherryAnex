@@ -6,6 +6,7 @@
 #include "pet_sprites.h"
 #include "splash.h"
 #include "stats.h"
+#include "game.h"
 
 // 128 samples at this interval is about a minute of history.
 #define WPM_SAMPLE_INTERVAL_MS 500
@@ -16,6 +17,9 @@
 #define WPM_GRAPH_MIN_SCALE 40
 // Pet walks along the bottom four pages.
 #define PET_FIRST_PAGE 4
+
+// Set when the screen was cleared, so parts that only draw on change redraw.
+static bool redraw = true;
 
 static void write_status_line(const status_line_t *line) {
     // 21 columns fill the row, so the cursor wraps to the next line by itself.
@@ -76,9 +80,12 @@ static void render_left(void) {
     oled_write_P(PSTR("     PEAK "), false);
     oled_write(get_u8_str(peak, ' '), false);
 
-    if (timer_elapsed32(last_sample) >= WPM_SAMPLE_INTERVAL_MS) {
+    bool sample = timer_elapsed32(last_sample) >= WPM_SAMPLE_INTERVAL_MS;
+    if (sample) {
         last_sample = timer_read32();
         graph_push(&history, wpm);
+    }
+    if (sample || redraw) {
         render_wpm_graph(&history);
     }
 }
@@ -97,18 +104,33 @@ static void render_pet(const pet_t *pet) {
 }
 
 static void render_right(void) {
-    static pet_t       pet;
-    static bool        drawn;
-    status_line_t      line;
-    const keycount_t  *count = stats_keycount();
+    static pet_t      pet;
+    status_line_t     line;
+    const keycount_t *count = stats_keycount();
 
     status_count_line(&line, count->total, count->session);
     oled_set_cursor(0, 3);
     write_status_line(&line);
 
-    if (pet_update(&pet, get_current_wpm(), last_input_activity_elapsed(), timer_read32()) || !drawn) {
+    if (pet_update(&pet, get_current_wpm(), last_input_activity_elapsed(), timer_read32()) || redraw) {
         render_pet(&pet);
-        drawn = true;
+    }
+}
+
+static void render_game(void) {
+    const snake_t *snake = game_snake();
+
+    for (uint8_t page = 0; page < OLED_DISPLAY_HEIGHT / 8; ++page) {
+        for (uint8_t x = 0; x < OLED_DISPLAY_WIDTH; ++x) {
+            oled_write_raw_byte(snake_page_byte(snake, x, page), page * OLED_DISPLAY_WIDTH + x);
+        }
+    }
+    if (snake->state == SNAKE_READY) {
+        oled_set_cursor(0, 1);
+        oled_write_P(PSTR("ARROWS OR WASD: START"), false);
+    } else if (snake->state == SNAKE_OVER) {
+        oled_set_cursor(6, 1);
+        oled_write_P(PSTR("GAME OVER"), true);
     }
 }
 
@@ -134,14 +156,31 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 }
 
 bool oled_task_user(void) {
+    static bool gaming;
+
     if (render_splash()) {
         return false;
     }
+    // The game runs where the keys are processed.
+    if (is_keyboard_master() && game_active()) {
+        if (game_task() || !gaming) {
+            render_game();
+        }
+        gaming = true;
+        return false;
+    }
+    if (gaming) {
+        gaming = false;
+        oled_clear();
+        redraw = true;
+    }
+
     render_status_strip();
     if (is_keyboard_left()) {
         render_left();
     } else {
         render_right();
     }
+    redraw = false;
     return false;
 }

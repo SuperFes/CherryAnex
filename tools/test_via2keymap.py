@@ -40,6 +40,10 @@ class TranslateTest(unittest.TestCase):
     def test_nested_codes_are_translated(self):
         self.assertEqual(v.translate("LT(1, KC_MS_BTN1)"), "LT(1, MS_BTN1)")
 
+    def test_custom_keycodes_map_to_keyboard_range(self):
+        self.assertEqual(v.translate("CUSTOM(0)"), "QK_KB_0")
+        self.assertEqual(v.translate("CUSTOM( 12 )"), "QK_KB_12")
+
     def test_prefix_is_not_partially_replaced(self):
         self.assertEqual(v.translate("RGB_MODE_PLAIN"), "RGB_MODE_PLAIN")
 

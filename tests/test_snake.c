@@ -149,6 +149,15 @@ static void test_page_bytes(void) {
     CHECK(snake_page_byte(&s, 0, 0) == 0x20);
 }
 
+static void test_direction_keys(void) {
+    snake_dir_t dir;
+    CHECK(snake_dir_for_usage(0x52, &dir) && dir == SNAKE_UP);
+    CHECK(snake_dir_for_usage(0x04, &dir) && dir == SNAKE_LEFT);
+    CHECK(snake_dir_for_usage(0x16, &dir) && dir == SNAKE_DOWN);
+    CHECK(snake_dir_for_usage(0x4F, &dir) && dir == SNAKE_RIGHT);
+    CHECK(!snake_dir_for_usage(0x29, &dir)); // Esc
+}
+
 int main(void) {
     test_init();
     test_first_turn_starts_and_steps_on_interval();
@@ -159,5 +168,6 @@ int main(void) {
     test_self_collision_but_tail_chasing_is_legal();
     test_food_avoids_body();
     test_page_bytes();
+    test_direction_keys();
     return CHECK_DONE();
 }

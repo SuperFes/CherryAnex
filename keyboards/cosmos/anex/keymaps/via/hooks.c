@@ -1,6 +1,7 @@
 // QMK user hooks, dispatched to the features that need them.
 
 #include QMK_KEYBOARD_H
+#include "game.h"
 #include "stats.h"
 
 void keyboard_post_init_user(void) {
@@ -9,7 +10,7 @@ void keyboard_post_init_user(void) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     stats_record(record);
-    return true;
+    return !game_record(keycode, record);
 }
 
 void housekeeping_task_user(void) {
