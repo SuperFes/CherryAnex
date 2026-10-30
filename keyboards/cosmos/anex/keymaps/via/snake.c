@@ -1,4 +1,5 @@
 #include "snake.h"
+#include "rng.h"
 
 #include <string.h>
 
@@ -23,22 +24,13 @@ bool snake_occupied(const snake_t *snake, uint8_t x, uint8_t y) {
     return snake->occupied[i / 8] & (1u << (i % 8));
 }
 
-static uint32_t next_random(snake_t *snake) {
-    // xorshift32
-    uint32_t r = snake->rng;
-    r ^= r << 13;
-    r ^= r >> 17;
-    r ^= r << 5;
-    return snake->rng = r;
-}
-
 // Returns false when the board is full.
 static bool place_food(snake_t *snake) {
     uint16_t free = SNAKE_CELLS - snake->length;
     if (!free) {
         return false;
     }
-    uint16_t pick = next_random(snake) % free;
+    uint16_t pick = rng_next(&snake->rng) % free;
     for (uint8_t y = 0; y < SNAKE_ROWS; ++y) {
         for (uint8_t x = 0; x < SNAKE_COLS; ++x) {
             if (!snake_occupied(snake, x, y) && pick-- == 0) {
