@@ -1,9 +1,13 @@
 #include QMK_KEYBOARD_H
+
+#include <string.h>
+
 #include "logo.h"
 #include "status.h"
 #include "graph.h"
 #include "pet.h"
 #include "pet_sprites.h"
+#include "runner_sprites.h"
 #include "splash.h"
 #include "stats.h"
 #include "game.h"
@@ -22,6 +26,9 @@
 
 // Screensaver frame rate, about 20 fps.
 #define SAVER_FRAME_MS 50
+
+// Shared by the scenes that place sprites freely; only one shows at a time.
+static canvas_t canvas;
 
 // Set when the screen was cleared, so parts that only draw on change redraw.
 static bool redraw = true;
@@ -138,7 +145,38 @@ static void render_right(void) {
     }
 }
 
-static void render_game(void) {
+static void write_canvas(void) {
+    for (uint16_t i = 0; i < CANVAS_BYTES; ++i) {
+        oled_write_raw_byte(canvas.bytes[i], i);
+    }
+}
+
+// Text over a game scene: a hint before the first move, GAME OVER after.
+static void write_game_banner(uint8_t state, const char *hint) {
+    if (state == SNAKE_READY) {
+        oled_set_cursor((OLED_DISPLAY_WIDTH / OLED_FONT_WIDTH - strlen(hint)) / 2, 1);
+        oled_write(hint, false);
+    } else if (state == SNAKE_OVER) {
+        oled_set_cursor(6, 1);
+        oled_write_P(PSTR("GAME OVER"), true);
+    }
+}
+
+static void render_menu(void) {
+    const game_view_t *game = game_view();
+
+    oled_clear();
+    oled_set_cursor(5, 1);
+    oled_write_P(PSTR("PICK A GAME"), false);
+    for (uint8_t kind = 0; kind < GAME_COUNT; ++kind) {
+        bool selected = kind == game->kind;
+        oled_set_cursor(6, 3 + kind * 2);
+        oled_write(selected ? ">" : " ", false);
+        oled_write(game_name(kind), selected);
+    }
+}
+
+static void render_snake(void) {
     const snake_t *snake = game_snake();
 
     for (uint8_t page = 0; page < OLED_DISPLAY_HEIGHT / 8; ++page) {
@@ -146,12 +184,35 @@ static void render_game(void) {
             oled_write_raw_byte(snake_page_byte(snake, x, page), page * OLED_DISPLAY_WIDTH + x);
         }
     }
-    if (snake->state == SNAKE_READY) {
-        oled_set_cursor(0, 1);
-        oled_write_P(PSTR("ARROWS OR WASD: START"), false);
-    } else if (snake->state == SNAKE_OVER) {
-        oled_set_cursor(6, 1);
-        oled_write_P(PSTR("GAME OVER"), true);
+    write_game_banner(snake->state, "ARROWS OR WASD: START");
+}
+
+static void render_runner(void) {
+    const runner_t      *runner = game_runner();
+    const uint8_t *const pet[3] = {
+        (const uint8_t *)pet_sprites[PET_SPRITE_RUN_1],
+        (const uint8_t *)pet_sprites[PET_SPRITE_RUN_2],
+        (const uint8_t *)pet_sprites[PET_SPRITE_BLINK],
+    };
+    const uint8_t *obstacles[RUNNER_SPRITE_COUNT];
+    for (uint8_t i = 0; i < RUNNER_SPRITE_COUNT; ++i) {
+        obstacles[i] = (const uint8_t *)runner_sprites[i];
+    }
+
+    runner_draw(&canvas, runner, pet, obstacles);
+    write_canvas();
+    write_game_banner(runner->state, "SPACE OR UP: JUMP");
+}
+
+static void render_game(void) {
+    const game_view_t *game = game_view();
+
+    if (game->menu) {
+        render_menu();
+    } else if (game->kind == GAME_RUNNER) {
+        render_runner();
+    } else {
+        render_snake();
     }
 }
 
@@ -177,7 +238,6 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 }
 
 static void render_saver(void) {
-    static canvas_t canvas;
     static uint32_t last_frame;
 
     if (timer_elapsed32(last_frame) < SAVER_FRAME_MS && !redraw) {
@@ -197,9 +257,7 @@ static void render_saver(void) {
     } else {
         saver_draw_stars(&canvas, t, half);
     }
-    for (uint16_t i = 0; i < CANVAS_BYTES; ++i) {
-        oled_write_raw_byte(canvas.bytes[i], i);
-    }
+    write_canvas();
 }
 
 typedef enum {

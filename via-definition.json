@@ -9,7 +9,7 @@
   "keycodes": ["qmk_lighting"],
   "menus": ["qmk_rgb_matrix"],
   "customKeycodes": [
-    {"name": "Game", "title": "Toggle snake game", "shortName": "Game"},
+    {"name": "Game", "title": "Open or close the game menu", "shortName": "Game"},
     {"name": "Saver", "title": "Switch screensaver style", "shortName": "Saver"}
   ],
   "layouts": {

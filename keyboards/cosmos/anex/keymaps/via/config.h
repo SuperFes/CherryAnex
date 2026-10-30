@@ -11,7 +11,7 @@
 
 // See storage.h. The version stays at the original block size so growing the
 // block keeps the stored keypress total; later fields carry their own check.
-#define EECONFIG_USER_DATA_SIZE 12
+#define EECONFIG_USER_DATA_SIZE 16
 #define EECONFIG_USER_DATA_VERSION 4
 
 // QMK's WPM smoothing overshoots when the main loop runs slower than its
