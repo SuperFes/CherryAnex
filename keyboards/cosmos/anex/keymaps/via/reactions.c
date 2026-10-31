@@ -70,7 +70,7 @@ void reactions_record(uint16_t keycode, keyrecord_t *record) {
 
     backspaces = usage == KC_BACKSPACE ? backspaces + 1 : 0;
     if (backspaces == SWEAT_AFTER) {
-        react(PET_REACT_SWEAT);
+        ++view.sweat_seq;
     }
 
     char finished[WORDS_MAX_LEN + 1];
@@ -81,6 +81,8 @@ void reactions_record(uint16_t keycode, keyrecord_t *record) {
         react(PET_FIRST_SWEAR_REACTION + rng_next(&rng) % PET_SWEAR_REACTIONS);
     } else if (usage == KC_SPACE) {
         react(PET_REACT_HOP);
+    } else if (usage == KC_BACKSPACE) {
+        react(PET_REACT_BACKSTEP);
     }
 }
 

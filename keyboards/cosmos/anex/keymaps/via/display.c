@@ -139,6 +139,7 @@ static void render_pet(const pet_t *pet, uint32_t now) {
 static void render_right(void) {
     static pet_t            pet;
     static uint8_t          seen_reaction;
+    static uint8_t          seen_sweat;
     static uint32_t         last_draw;
     status_line_t           line;
     const keycount_t       *count    = stats_keycount();
@@ -158,6 +159,11 @@ static void render_right(void) {
     if (reaction->seq != seen_reaction) {
         seen_reaction = reaction->seq;
         pet_react(&pet, reaction->reaction, now);
+        changed = true;
+    }
+    if (reaction->sweat_seq != seen_sweat) {
+        seen_sweat = reaction->sweat_seq;
+        pet_sweat(&pet, now);
         changed = true;
     }
     // Mods and LEDs are synced from the USB half, so either half can show them.

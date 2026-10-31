@@ -21,8 +21,8 @@ typedef enum {
 // One-off reactions to typing; the swear ones take precedence over the rest.
 typedef enum {
     PET_REACT_NONE,
-    PET_REACT_HOP,   // Space
-    PET_REACT_SWEAT, // a run of Backspace
+    PET_REACT_HOP,      // Space
+    PET_REACT_BACKSTEP, // Backspace: a careful step back
     PET_REACT_GRAWLIX,
     PET_REACT_SOAP,
     PET_REACT_FAINT,
@@ -39,6 +39,9 @@ typedef struct {
     uint32_t       last_step;
     pet_reaction_t reaction;
     uint32_t       reaction_at;
+    uint8_t        backsteps; // alternates feet on each step back
+    bool           sweating;  // after a run of Backspace; overlays other reactions
+    uint32_t       sweat_at;
     bool           sneak; // Ctrl held
     bool           panic; // Caps Lock on
 } pet_t;
@@ -65,6 +68,7 @@ uint8_t pet_sprite(const pet_t *pet);
 // States held by keys; call before pet_update.
 void pet_hold(pet_t *pet, bool sneak, bool panic);
 void pet_react(pet_t *pet, pet_reaction_t reaction, uint32_t now);
+void pet_sweat(pet_t *pet, uint32_t now);
 
 // True while the pose changes every frame, so it needs constant redrawing.
 bool       pet_animating(const pet_t *pet, uint32_t now);

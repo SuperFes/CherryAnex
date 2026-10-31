@@ -2,11 +2,12 @@
 
 #include QMK_KEYBOARD_H
 
-// The latest pet reaction, synced to the non-USB half. seq changes with each
-// new reaction so the pet knows to play it.
+// The latest pet reaction, synced to the non-USB half. seq and sweat_seq
+// change with each new reaction or sweat so the pet knows to play it.
 typedef struct {
     uint8_t seq;
     uint8_t reaction; // pet_reaction_t
+    uint8_t sweat_seq;
 } reactions_view_t;
 
 const reactions_view_t *reactions_view(void);

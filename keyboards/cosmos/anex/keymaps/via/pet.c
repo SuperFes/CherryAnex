@@ -3,13 +3,15 @@
 #include "petfx_sprite_ids.h"
 
 static const uint16_t reaction_ms[PET_REACTIONS] = {
-    [PET_REACT_HOP]     = 300,
-    [PET_REACT_SWEAT]   = 1500,
-    [PET_REACT_GRAWLIX] = 2500,
-    [PET_REACT_SOAP]    = 2500,
-    [PET_REACT_FAINT]   = 2500,
+    [PET_REACT_HOP]      = 300,
+    [PET_REACT_BACKSTEP] = 200,
+    [PET_REACT_GRAWLIX]  = 2500,
+    [PET_REACT_SOAP]     = 2500,
+    [PET_REACT_FAINT]    = 2500,
 };
 #define HOP_HEIGHT 6
+#define BACKSTEP_PX 3
+#define SWEAT_MS 1500
 
 typedef struct {
     uint8_t  sprites[PET_STEPS];
@@ -45,10 +47,34 @@ static bool swearing(const pet_t *pet, uint32_t now) {
     return reacting(pet, now) && pet->reaction >= PET_FIRST_SWEAR_REACTION;
 }
 
+static bool sweating(const pet_t *pet, uint32_t now) {
+    return pet->sweating && now - pet->sweat_at < SWEAT_MS;
+}
+
+static uint8_t backstep_progress(const pet_t *pet, uint32_t now) {
+    uint32_t elapsed = now - pet->reaction_at;
+    uint32_t ms      = reaction_ms[PET_REACT_BACKSTEP];
+    return BACKSTEP_PX * (elapsed < ms ? elapsed : ms) / ms;
+}
+
+// Moves the pet by however far the current step back has got, so a new
+// reaction carries on from where it is.
+static void settle_backstep(pet_t *pet, uint32_t now) {
+    if (pet->reaction == PET_REACT_BACKSTEP) {
+        pet->x        = (uint8_t)((pet->x + PET_SCREEN_WIDTH - backstep_progress(pet, now)) % PET_SCREEN_WIDTH);
+        pet->reaction = PET_REACT_NONE;
+    }
+}
+
 bool pet_update(pet_t *pet, uint8_t wpm, uint32_t idle_ms, uint32_t now) {
     bool changed = false;
     if (pet->reaction != PET_REACT_NONE && !reacting(pet, now)) {
+        settle_backstep(pet, now);
         pet->reaction = PET_REACT_NONE;
+        changed       = true;
+    }
+    if (pet->sweating && !sweating(pet, now)) {
+        pet->sweating = false;
         changed       = true;
     }
 
@@ -63,8 +89,9 @@ bool pet_update(pet_t *pet, uint8_t wpm, uint32_t idle_ms, uint32_t now) {
     if (now - pet->last_step < def->interval_ms) {
         return changed;
     }
-    // Swearing and panicking stop it in its tracks; sneaking creeps along.
-    uint8_t speed = (swearing(pet, now) || pet->panic) ? 0 : pet->sneak ? 1 : def->speed;
+    // Swearing, panicking and stepping back stop it walking; sneaking creeps along.
+    bool    held  = swearing(pet, now) || pet->panic || (reacting(pet, now) && pet->reaction == PET_REACT_BACKSTEP);
+    uint8_t speed = held ? 0 : pet->sneak ? 1 : def->speed;
     pet->step      = (pet->step + 1) % PET_STEPS;
     pet->x         = (uint8_t)((pet->x + speed) % PET_SCREEN_WIDTH);
     pet->last_step = now;
@@ -85,12 +112,21 @@ void pet_react(pet_t *pet, pet_reaction_t reaction, uint32_t now) {
     if (swearing(pet, now) && reaction < PET_FIRST_SWEAR_REACTION) {
         return;
     }
+    settle_backstep(pet, now);
+    if (reaction == PET_REACT_BACKSTEP) {
+        ++pet->backsteps;
+    }
     pet->reaction    = reaction;
     pet->reaction_at = now;
 }
 
+void pet_sweat(pet_t *pet, uint32_t now) {
+    pet->sweating = true;
+    pet->sweat_at = now;
+}
+
 bool pet_animating(const pet_t *pet, uint32_t now) {
-    return pet->panic || (reacting(pet, now) && pet->reaction != PET_REACT_FAINT);
+    return pet->panic || sweating(pet, now) || (reacting(pet, now) && pet->reaction != PET_REACT_FAINT);
 }
 
 // -1 or 1, flipping every period.
@@ -137,10 +173,14 @@ pet_pose_t pet_pose(const pet_t *pet, uint32_t now) {
         uint32_t t = elapsed * 100 / reaction_ms[PET_REACT_HOP];
         pose.dy    = -(int8_t)(4 * HOP_HEIGHT * t * (100 - t) / 10000);
     }
-    if (reacting(pet, now) && pet->reaction == PET_REACT_SWEAT) {
+    if (reacting(pet, now) && pet->reaction == PET_REACT_BACKSTEP) {
+        pose.sprite = pet->backsteps % 2 ? PET_SPRITE_CROUCH_2 : PET_SPRITE_CROUCH_1;
+        pose.dx     = -(int8_t)backstep_progress(pet, now);
+    }
+    if (sweating(pet, now)) {
         pose.fx   = PETFX_SPRITE_SWEAT;
         pose.fx_x = 0;
-        pose.fx_y = 2 + elapsed / 250; // the drop slides down
+        pose.fx_y = 2 + (now - pet->sweat_at) / 250; // the drop slides down
     }
     return pose;
 }

@@ -121,12 +121,53 @@ static void test_sneak_crouches_and_creeps(void) {
 
 static void test_sweat_drop_slides_down(void) {
     pet_t pet = {.mood = PET_IDLE};
-    pet_react(&pet, PET_REACT_SWEAT, 0);
+    pet_sweat(&pet, 0);
     pet_pose_t start = pet_pose(&pet, 0);
     pet_pose_t later = pet_pose(&pet, 1000);
     CHECK(start.fx == PETFX_SPRITE_SWEAT);
     CHECK(later.fx_y > start.fx_y);
     CHECK(pet_pose(&pet, 1500).fx == -1);
+}
+
+static void test_backstep_tiptoes_back(void) {
+    pet_t pet = {.mood = PET_IDLE, .x = 10};
+    pet_react(&pet, PET_REACT_BACKSTEP, 0);
+    pet_pose_t pose = pet_pose(&pet, 100);
+    CHECK(pose.sprite == PET_SPRITE_CROUCH_1 || pose.sprite == PET_SPRITE_CROUCH_2);
+    CHECK(pose.dx < 0 && pose.dx > -3);
+    CHECK(pet_animating(&pet, 100));
+    CHECK(pet_update(&pet, 0, 0, 200));
+    CHECK(pet.x == 7);
+    CHECK(pet_pose(&pet, 200).dx == 0);
+}
+
+static void test_backsteps_chain_and_alternate_feet(void) {
+    pet_t pet = {.mood = PET_IDLE, .x = 10};
+    pet_react(&pet, PET_REACT_BACKSTEP, 0);
+    uint8_t first = pet_pose(&pet, 50).sprite;
+    // Interrupted halfway: keeps the ground already covered.
+    pet_react(&pet, PET_REACT_BACKSTEP, 100);
+    CHECK(pet.x == 9);
+    CHECK(pet_pose(&pet, 150).sprite != first);
+    pet_update(&pet, 0, 0, 300);
+    CHECK(pet.x == 6);
+}
+
+static void test_backstep_wraps_and_holds_walking(void) {
+    pet_t pet = {.mood = PET_WALK, .x = 1};
+    pet_react(&pet, PET_REACT_BACKSTEP, 100);
+    // A walk step falls due mid-step-back and doesn't move it forward.
+    CHECK(pet_update(&pet, 20, 0, 220));
+    CHECK(pet.x == 1);
+    pet_update(&pet, 20, 0, 300);
+    CHECK(pet.x == PET_SCREEN_WIDTH - 2);
+}
+
+static void test_sweat_survives_more_backsteps(void) {
+    pet_t pet = {.mood = PET_IDLE, .x = 50};
+    pet_sweat(&pet, 0);
+    pet_react(&pet, PET_REACT_BACKSTEP, 10);
+    CHECK(pet_pose(&pet, 50).fx == PETFX_SPRITE_SWEAT);
 }
 
 int main(void) {
@@ -143,5 +184,9 @@ int main(void) {
     test_panic_outranks_sneak();
     test_sneak_crouches_and_creeps();
     test_sweat_drop_slides_down();
+    test_backstep_tiptoes_back();
+    test_backsteps_chain_and_alternate_feet();
+    test_backstep_wraps_and_holds_walking();
+    test_sweat_survives_more_backsteps();
     return CHECK_DONE();
 }
