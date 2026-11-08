@@ -270,7 +270,7 @@ static bool render_splash(void) {
 
 // Mounted with the panel's header at the bottom.
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-    return OLED_ROTATION_180;
+    return OLED_ROTATION_0;
 }
 
 static void render_saver(void) {
