@@ -6,6 +6,9 @@ presses. The time, CPU/RAM figures and keypress counts are made up, and the
 games are played by simple bots. See the [main README](../README.md) for the
 keys involved.
 
+`tools/render_gifs.py` regenerates them; the scenes are scripted in
+`tools/oledsim/sim.c`, which mirrors `display.c`.
+
 ## Boot
 
 The logo (four seconds on the keyboard, shortened here), then the status screens.

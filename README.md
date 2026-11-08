@@ -74,6 +74,7 @@ right one stops getting the left's state.
 | Boot logo | `KB Logo.png` (128x64) | `tools/img2oled.py` |
 | Pet, effects and runner art | `art/pet.txt`, `art/pet_fx.txt`, `art/runner.txt` | `tools/sprites.py` (with `--sheet` and `--prefix` for the last two) |
 | Swear list | `art/badwords.txt`, not in git; see `art/badwords.example.txt` | `tools/badwords.py` |
+| Gallery GIFs | anything drawn on the displays; scenes are scripted in `tools/oledsim/sim.c` | `QMK_HOME=/path/to/qmk_firmware tools/render_gifs.py` |
 
 Every new build resets VIA's stored keymap to the default, which is why the
 default is generated from the VIA backup. Generated files say so at the top;
