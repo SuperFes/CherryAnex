@@ -6,6 +6,8 @@ VIA-editable keymap.
 
 ## Displays
 
+See the [display gallery](docs/README.md) for animations of everything below.
+
 Both halves show a status strip: the layer, active modifiers, lock keys and,
 while [anex-host](host/README.md) runs on the PC, the time.
 
